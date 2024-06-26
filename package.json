@@ -16,13 +16,12 @@
   "build": {
     "appId": "com.nsis.installer.app",
     "win": {
-      "target": ["nsis"],
-      "icon": "assets/son-goku.ico"
+      "target": ["nsis"]
     },
     "nsis": {
+	    "allowToChangeInstallationDirectory": true,
       "oneClick": false,
-	  "allowToChangeInstallationDirectory": true,
-      "include": "assets/installer.nsh"
+      "include": "build/installer.nsh"
     }
   }
 }
