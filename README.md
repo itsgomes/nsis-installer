@@ -1,10 +1,12 @@
 # NSIS Installer
 
-A study project to customize the nsis installer
+A study project to customize nsis installer running into electron-builder
 
 ## Usage
 
-Run the build script to see the result.
+Run the ``npm i``.
+
+Then execute ``npm run build`` to generate the installer at dist folder.
 
 ## Contributing
 
