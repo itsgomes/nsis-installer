@@ -6,9 +6,10 @@
 !include "MUI2.nsh"
 
 Var Dialog
+Var isExpress
+
 Var HWND_BUTTON_EXPRESS
 Var HWND_BUTTON_CUSTOM
-Var isExpress
 
 ;----------------
 ; Customization
@@ -42,8 +43,6 @@ Page directory skipPage
 ; Function
 ;----------------
 Function dialogPage
-	StrCpy $R8 1
-
 	!insertmacro MUI_HEADER_TEXT "Instalação" "Escolha o tipo de instalação que você deseja executar."
 
 	nsDialogs::Create /NOUNLOAD 1018
@@ -54,13 +53,13 @@ Function dialogPage
 	${EndIf}
 
 	${NSD_CreateGroupBox} 0u 10u 100% 40% "Selecione o tipo de instalação que deseja executar."
-	   Pop $0
+		Pop $0
 
 	${NSD_CreateRadioButton} 10 50 80% 12u "Expressa"
-	   Pop $HWND_BUTTON_EXPRESS
+		Pop $HWND_BUTTON_EXPRESS
 
 	${NSD_CreateRadioButton} 10 70 80% 12u "Customizada"
-	   Pop $HWND_BUTTON_CUSTOM
+		Pop $HWND_BUTTON_CUSTOM
 
 	${NSD_AddStyle} $HWND_BUTTON_EXPRESS ${WS_GROUP}
 	${NSD_SetState} $HWND_BUTTON_EXPRESS ${BST_CHECKED}
@@ -70,27 +69,24 @@ Function dialogPage
 FunctionEnd
 
 Function onDialogClose
-    ${NSD_GetState} $HWND_BUTTON_EXPRESS $R0
-    
-    ${If} $R0 = 1
-		; Express
+	${NSD_GetState} $HWND_BUTTON_EXPRESS $R0
+	
+	${If} $R0 = 1
 		StrCpy $isExpress 1
-    ${Else}
-		; Custom
+	${Else}
 		StrCpy $isExpress 0
-    ${EndIf}
+	${EndIf}
 FunctionEnd
 
 Function denyBack
-    pop $0
-    Abort
+	pop $0
+	Abort
 FunctionEnd
 
 Function skipPage
-    ${If} $isExpress = 1
+	${If} $isExpress = 1
 		Abort
-	${Else}
-    ${EndIf}
+	${EndIf}
 FunctionEnd
 
 !macro customInstallMode
