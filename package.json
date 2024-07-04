@@ -20,6 +20,7 @@
     },
     "nsis": {
       "oneClick": false,
+	  "allowElevation": true,
       "include": "build/installer.nsh"
     }
   }

@@ -5,11 +5,15 @@
 !include nsDialogs.nsh
 !include "MUI2.nsh"
 
+;----------------
+; Variables
+;----------------
 Var Dialog
 Var isExpress
 
-Var HWND_BUTTON_EXPRESS
-Var HWND_BUTTON_CUSTOM
+Var HWND_ML_TEXT
+Var HWND_LABEL
+Var HWND_IS_EXPRESS
 
 ;----------------
 ; Customization
@@ -34,53 +38,67 @@ Var HWND_BUTTON_CUSTOM
 ;----------------
 ; Pages
 ;----------------
-!insertmacro MUI_PAGE_LICENSE "${PROJECT_DIR}/license/license.txt"
-
 Page custom dialogPage onDialogClose
-Page directory skipPage
+
+!define MUI_PAGE_CUSTOMFUNCTION_PRE skipPage
+!insertmacro MUI_PAGE_DIRECTORY
 
 ;----------------
 ; Function
 ;----------------
 Function dialogPage
-	!insertmacro MUI_HEADER_TEXT "Instalação" "Escolha o tipo de instalação que você deseja executar."
+	!insertmacro MUI_HEADER_TEXT "Acordo de Licença" "Por favor, leia com atenção os termos da licença antes de instalar o nsis-installer."
 
+	; Setting 'next button' text
+	Push $R0
+	GetDlgItem $R0 $HWNDPARENT 1
+	SendMessage $R0 ${WM_SETTEXT} 0 "STR:Eu concordo"
+	Pop $R0
+
+	; Creating page
 	nsDialogs::Create /NOUNLOAD 1018
 	Pop $Dialog
 
 	${If} $Dialog == error
 		Abort
 	${EndIf}
-
-	${NSD_CreateGroupBox} 0u 10u 100% 40% "Selecione o tipo de instalação que deseja executar."
-		Pop $0
-
-	${NSD_CreateRadioButton} 10 50 80% 12u "Expressa"
-		Pop $HWND_BUTTON_EXPRESS
-
-	${NSD_CreateRadioButton} 10 70 80% 12u "Customizada"
-		Pop $HWND_BUTTON_CUSTOM
-
-	${NSD_AddStyle} $HWND_BUTTON_EXPRESS ${WS_GROUP}
-	${NSD_SetState} $HWND_BUTTON_EXPRESS ${BST_CHECKED}
-	${NSD_OnBack} denyBack
+	
+	; Creating multiline text control
+	nsDialogs::CreateControl EDIT \ 
+		"${__NSD_Text_STYLE}|${WS_VSCROLL}|${ES_MULTILINE}|${ES_READONLY}|${ES_WANTRETURN}" \ 
+		"${__NSD_Text_EXSTYLE}" \
+		0 0 100% 70% \
+		""
+		Pop $HWND_ML_TEXT
+	
+	; Setting colors to multiline text control
+	SetCtlColors $HWND_ML_TEXT 000000 FFFFFF
+	
+	; Reading and importing data to multiline text control
+	FileOpen $4 "${PROJECT_DIR}\license\license.txt" r
+	loop:
+		FileRead $4 $1
+		SendMessage $HWND_ML_TEXT ${EM_REPLACESEL} 0 "STR:$1"
+		IfErrors +1 loop
+	FileClose $4
+	
+	${NSD_CreateLabel} 0 75% 100% 15% "Se você aceita os termos do acordo, clique em Eu concordo para continuar.$\nVocê deve aceitar o acordo para instalar o nsis-installer."
+		Pop $HWND_LABEL
+		
+	${NSD_CreateCheckbox} 0 90% 100% 10% "Desejo que seja realizado uma instalação expressa"
+		Pop $HWND_IS_EXPRESS
 
 	nsDialogs::Show
 FunctionEnd
 
 Function onDialogClose
-	${NSD_GetState} $HWND_BUTTON_EXPRESS $R0
+	${NSD_GetState} $HWND_IS_EXPRESS $R0
 	
 	${If} $R0 = 1
 		StrCpy $isExpress 1
 	${Else}
 		StrCpy $isExpress 0
 	${EndIf}
-FunctionEnd
-
-Function denyBack
-	pop $0
-	Abort
 FunctionEnd
 
 Function skipPage
