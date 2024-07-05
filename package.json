@@ -16,11 +16,13 @@
   "build": {
     "appId": "com.nsis.installer.app",
     "win": {
-      "target": ["nsis"]
+      "target": ["nsis"],
+	  "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
       "oneClick": false,
 	  "allowElevation": true,
+	  "allowToChangeInstallationDirectory": true,
       "include": "build/installer.nsh"
     }
   }

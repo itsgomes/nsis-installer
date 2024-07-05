@@ -9,7 +9,6 @@
 ; Variables
 ;----------------
 Var Dialog
-Var isExpress
 
 Var HWND_ML_TEXT
 Var HWND_LABEL
@@ -40,9 +39,6 @@ Var HWND_IS_EXPRESS
 ;----------------
 Page custom dialogPage onDialogClose
 
-!define MUI_PAGE_CUSTOMFUNCTION_PRE skipPage
-!insertmacro MUI_PAGE_DIRECTORY
-
 ;----------------
 ; Function
 ;----------------
@@ -65,7 +61,7 @@ Function dialogPage
 	
 	; Creating multiline text control
 	nsDialogs::CreateControl EDIT \ 
-		"${__NSD_Text_STYLE}|${WS_VSCROLL}|${ES_MULTILINE}|${ES_READONLY}|${ES_WANTRETURN}" \ 
+		"${DEFAULT_STYLES}|${WS_VSCROLL}|${ES_MULTILINE}|${ES_READONLY}|${ES_WANTRETURN}" \ 
 		"${__NSD_Text_EXSTYLE}" \
 		0 0 100% 70% \
 		""
@@ -95,24 +91,26 @@ Function onDialogClose
 	${NSD_GetState} $HWND_IS_EXPRESS $R0
 	
 	${If} $R0 = 1
-		StrCpy $isExpress 1
-	${Else}
-		StrCpy $isExpress 0
+		StrCpy $R9 "3"
+		Call RelGoToPage
 	${EndIf}
 FunctionEnd
 
-Function skipPage
-	${If} $isExpress = 1
-		Abort
-	${EndIf}
+Function RelGoToPage
+  IntCmp $R9 0 0 Move Move
+    StrCmp $R9 "X" 0 Move
+      StrCpy $R9 "120"
+
+  Move:
+  SendMessage $HWNDPARENT "0x408" "$R9" ""
 FunctionEnd
 
-!macro customInstallMode
-	${If} $isExpress = 1
-		StrCpy $isForceCurrentInstall 1
-		StrCpy $isForceMachineInstall 0
-	${Else}
-		StrCpy $isForceCurrentInstall 0
-		StrCpy $isForceMachineInstall 1
-	${EndIf}
+!macro customInit
+    ${if} $installMode == "all"
+        ${IfNot} ${UAC_IsAdmin}
+            ShowWindow $HWNDPARENT ${SW_HIDE}
+            !insertmacro UAC_RunElevated
+            Quit
+        ${endif}
+    ${endif}
 !macroend
