@@ -71,6 +71,7 @@ Function dialogPage
 	SetCtlColors $HWND_ML_TEXT 000000 FFFFFF
 	
 	; Reading and importing data to multiline text control
+	ClearErrors
 	FileOpen $4 "${PROJECT_DIR}\license\license.txt" r
 	loop:
 		FileRead $4 $1
